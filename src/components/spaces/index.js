@@ -19,7 +19,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 function Spaces() {
     const[loading, setLoading] = useState(false);
     const [searchValue, setSearchValue] = useState("");
-    const [spacesList, setSpacesList] = useState([]);
+    const [spacesList, setSpacesList] = useState({data:[], includes:{users:[]}});
 
     const apiUrl = process.env.NEXT_PUBLIC_SPACES_API_URL;
     const token = process.env.NEXT_PUBLIC_BEARER_TOKEN;
@@ -46,10 +46,14 @@ function Spaces() {
             }
         });
 
-        var res = await response.json();
-
-        console.log(res);
-        setSpacesList(res.data !== undefined ? res.data : []);
+        if(response.status === 200) {
+            var res = await response.json();
+            console.log(res);
+            if (res.data !== undefined) {
+                setSpacesList(res);
+            }
+        }
+        console.log(res.includes);
 
         setLoading(false);
     };
@@ -109,20 +113,22 @@ function Spaces() {
             /> */}
             <CardMedia
                 component="img"
-                height="140"
-                image="https://mui.com/static/images/cards/paella.jpg"
+                image={props.user.profile_image_url !== undefined 
+                        ? props.user.profile_image_url.replace("_normal", "") : "https://mui.com/static/images/cards/paella.jpg"}
+                // image="https://mui.com/static/images/cards/paella.jpg"
                 alt="Paella dish"
             />
 
                 <CardContent className="text-left">
-                    <Typography gutterBottom variant="h6" component="div">
+                    <Typography gutterBottom variant="subtitle1" className="font-bold" >
                         {props.space.title}
                     </Typography>
                     <Typography variant="subtitle2" color="text.secondary">
                         {props.space.created_at}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        {props.space.creator_id}
+                        {props.user.name} <Typography variant="caption">
+                            @{props.user.username}</Typography>
                     </Typography>
                 </CardContent>
         </React.Fragment>)
@@ -135,12 +141,20 @@ function Spaces() {
 
             <p className="py-4"></p>
 
-            {loading && <CircularProgress color="secondary" />}
+            {loading && 
+                <Box className="p-4" className="self-center">
+                    <CircularProgress size={30} color="secondary" />
+                </Box>
+            }
             {/* List of spaces */}
             <div className="flex flex-row flex-wrap">
-                {spacesList.map(space => 
-                    <Box className="p-4" sx={{ maxWidth: 345 }} key={space.id}>
-                        <Card key={space.id} variant="outlined"><CardItem space={space} /></Card>
+                {spacesList.data.map((space, index) => 
+                    <Box className="p-4" sx={{ width: 300 }} key={space.id}>
+                        <a href={"https://twitter.com/i/spaces/" + space.id} target="_blank" >
+                            <Card key={space.id} variant="outlined">
+                                <CardItem user={spacesList.includes.users.find(x => x.id === space.creator_id)} space={space} />
+                            </Card>
+                        </a>
                     </Box>
                 )}
                 

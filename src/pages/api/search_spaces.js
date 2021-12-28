@@ -8,9 +8,9 @@ export default async function SearchSpaces(req, res) {
     // return;
 
     var response = await fetch(apiUrl + '?query=' + req.body
-        + '&space.fields=title,created_at&expansions=creator_id', {
+        + '&space.fields=title,created_at&expansions=creator_id'
+        + '&user.fields=profile_image_url,username,name', {
         headers: {
-            "mode": "no-cors",
             // "User-Agent": "v2SpacesSearchJS",
             "Accept": "*/*",
             // "Accept-Encoding": "gzip, deflate, br",
@@ -18,9 +18,16 @@ export default async function SearchSpaces(req, res) {
             "authorization": `Bearer ${token}`
         }
     });
-    const jsonData = await response.json();
 
-    console.log(jsonData);
+    if (response.status === 200) {
+        const jsonData = await response.json();
+    
+        console.log(jsonData);
+    
+        res.status(200).json(jsonData);
+    } 
 
-    res.status(200).json(jsonData);
+    if (response.status === 500) {
+        res.status(500).json(response);
+    }
 }
