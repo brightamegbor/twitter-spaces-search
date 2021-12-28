@@ -1,8 +1,5 @@
 import React, { Fragment, useState } from 'react';
-import TextField from '@mui/material/TextField';
-import { Box, Button, CardMedia, Card, CardActions, CardContent, CardHeader, Typography, Avatar } from '@mui/material';
-import InputUnstyled from '@mui/base/InputUnstyled';
-import { styled } from '@mui/system';
+import { Box, CardMedia, Card, CardContent, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import Divider from '@mui/material/Divider';
@@ -11,35 +8,70 @@ import MenuIcon from '@mui/icons-material/Menu';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import SearchIcon from '@mui/icons-material/Search';
 import CircularProgress from '@mui/material/CircularProgress';
+import Moment from 'react-moment';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+
+import PropTypes from 'prop-types';
+// import TabPanel from '@mui/material/TabPanel';
 // import configData from "/config.json";
 // import needle from 'needle';
 
 // const needle = require('needle');
+
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+        >
+            {value === index && (
+                <Box>
+                    {children}
+                </Box>
+            )}
+        </div>
+    );
+}
+
+TabPanel.propTypes = {
+    children: PropTypes.node,
+    index: PropTypes.number.isRequired,
+    value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+    return {
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`,
+    };
+}
 
 function Spaces() {
     const[loading, setLoading] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [spacesList, setSpacesList] = useState({data:[], includes:{users:[]}});
 
+    const [value, setValue] = React.useState(0);
+    const handleChange = (event, newValue) => {
+        setValue(newValue);
+    };
+
     const apiUrl = process.env.NEXT_PUBLIC_SPACES_API_URL;
     const token = process.env.NEXT_PUBLIC_BEARER_TOKEN;
 
     const searchForSpaces = async (query) => {
-        // console.log(token);
+
         setLoading(true);
-
-        // return;
-
-        // const params = {
-        //     'query': query, // Replace the value with your search term
-        //     'space.fields': 'title,created_at',
-        //     'expansions': 'creator_id'
-        // }
         var response = await fetch("/api/search_spaces", {
             "method": "POST",
             "body": query,
             headers: {
-                // "User-Agent": "v2SpacesSearchJS",
                 "Accept": "*/*",
                 "Accept-Encoding": "gzip, deflate, br",
                 "Connection": "keep-alive",
@@ -48,12 +80,12 @@ function Spaces() {
 
         if(response.status === 200) {
             var res = await response.json();
-            console.log(res);
+            // console.log(res);
             if (res.data !== undefined) {
                 setSpacesList(res);
             }
         }
-        console.log(res.includes);
+        // console.log(res.includes);
 
         setLoading(false);
     };
@@ -97,23 +129,9 @@ function Spaces() {
 
         return (
         <React.Fragment>
-            {/* <CardHeader
-                    avatar={
-                        <Avatar sx={{ bgcolor: blue[500] }} aria-label="recipe">
-                            TS
-                        </Avatar>
-                    }
-                    // action={
-                    //     <IconButton aria-label="settings">
-                    //         <IconButton />
-                    //     </IconButton>
-                    // }
-                title="Shrimp and Chorizo Paella"
-                subheader="September 14, 2016 12:43 PM"
-            /> */}
             <CardMedia
                 component="img"
-                image={props.user.profile_image_url !== undefined 
+                    image={props.user !== undefined && props.user.profile_image_url !== undefined 
                         ? props.user.profile_image_url.replace("_normal", "") : "https://mui.com/static/images/cards/paella.jpg"}
                 // image="https://mui.com/static/images/cards/paella.jpg"
                 alt="Paella dish"
@@ -124,11 +142,11 @@ function Spaces() {
                         {props.space.title}
                     </Typography>
                     <Typography variant="subtitle2" color="text.secondary">
-                        {props.space.created_at}
+                        <Moment fromNow={true}>{props.space.created_at}</Moment>
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                        {props.user.name} <Typography variant="caption">
-                            @{props.user.username}</Typography>
+                        by {props.user !== undefined && props.user.name} <Typography variant="caption">
+                            {props.user !== undefined ? "@" + props.user.username : "(Authorization required to view this user details)"}</Typography>
                     </Typography>
                 </CardContent>
         </React.Fragment>)
@@ -147,18 +165,52 @@ function Spaces() {
                 </Box>
             }
             {/* List of spaces */}
-            <div className="flex flex-row flex-wrap">
-                {spacesList.data.map((space, index) => 
-                    <Box className="p-4" sx={{ width: 300 }} key={space.id}>
-                        <a href={"https://twitter.com/i/spaces/" + space.id} target="_blank" >
-                            <Card key={space.id} variant="outlined">
-                                <CardItem user={spacesList.includes.users.find(x => x.id === space.creator_id)} space={space} />
-                            </Card>
-                        </a>
-                    </Box>
-                )}
-                
-            </div>
+            {spacesList.data.length !== 0 && <Tabs onChange={handleChange} value={value} centered>
+                <Tab className="capitalize" label="Live" {...a11yProps(0)} />
+                <Tab className="capitalize" label="Scheduled" {...a11yProps(1)} />
+            </Tabs>}
+
+
+            <TabPanel value={value} index={0}>
+                <div className="flex flex-row flex-wrap">
+                    {spacesList.data.map((space, index) =>
+                        <Fragment key={space.id}> 
+                            {space.state === 'live' &&
+                                <Box className="p-4" sx={{ width: 300 }} key={space.id}>
+                                    <a href={"https://twitter.com/i/spaces/" + space.id} target="_blank" >
+                                        <Card key={space.id} variant="outlined">
+                                            <CardItem user={spacesList.includes.users.find(x => x.id === space.creator_id)} space={space} />
+                                        </Card>
+                                    </a>
+                                </Box>
+                            }
+                        
+                        </Fragment>
+                    )}
+
+                </div>
+            </TabPanel>
+
+            <TabPanel value={value} index={1}>
+                <div className="flex flex-row flex-wrap">
+                    {spacesList.data.map((space, index) =>
+                        <Fragment key={space.id}>
+                            {space.state !== 'live' &&
+                                <Box className="p-4" sx={{ width: 300 }} key={space.id}>
+                                    <a href={"https://twitter.com/i/spaces/" + space.id} target="_blank" >
+                                        <Card key={space.id} variant="outlined">
+                                            <CardItem user={spacesList.includes.users.find(x => x.id === space.creator_id)} space={space} />
+                                        </Card>
+                                    </a>
+                                </Box>
+                            }
+
+                        </Fragment>
+                    )}
+
+                </div>
+            </TabPanel>
+            
             
         </div>
     );
