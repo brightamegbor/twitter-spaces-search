@@ -22,11 +22,9 @@ import LogoutIcon from '@mui/icons-material/LogoutOutlined';
 import { styled, useTheme } from '@mui/material/styles';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-// import './index.css';
-// import Locate from "leaflet.locatecontrol";
 import MuiAppBar from '@mui/material/AppBar';
 import MuiDrawer from '@mui/material/Drawer';
-// import { grey } from '@mui/material/colors';
+import { useRouter } from 'next/router';
 
 const drawerWidth = 240;
 
@@ -111,10 +109,8 @@ function SideDrawer(props) {
     const handleDrawerOpenClose = () => {
         setOpen(!open);
     };
+    const { asPath, pathname } = useRouter();
 
-    // useEffect(() => {
-    //     // console.log(window?.location.pathname);
-    // }, [])
 
     const drawer = (
         <Fragment>
@@ -126,7 +122,7 @@ function SideDrawer(props) {
                             {[{name: 'Spaces', path: "/"}, {name: 'My Tweets', path: "/tweets"}, 
                             {name: 'Who Unfollowed Me', path: "/foll"}].map((text, index) => (
                                 <ListItem button key={text.name} 
-                                    // selected={text.path === window?.location.pathname}
+                                    selected={text.path === asPath}
                                     >
                                     <ListItemIcon>
                                         {index === 0 ? <TravelExploreIcon /> :

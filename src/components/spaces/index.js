@@ -54,6 +54,8 @@ function a11yProps(index) {
 
 function Spaces() {
     const[loading, setLoading] = useState(false);
+    const [noneFound, setNoneFound] = useState(false);
+    const [error, setError] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [spacesList, setSpacesList] = useState({data:[], includes:{users:[]}});
 
@@ -67,6 +69,8 @@ function Spaces() {
 
     const searchForSpaces = async (query) => {
 
+        setError(false);
+        setNoneFound(false);
         setLoading(true);
         var response = await fetch("/api/search_spaces", {
             "method": "POST",
@@ -83,12 +87,22 @@ function Spaces() {
             // console.log(res);
             if (res.data !== undefined) {
                 setSpacesList(res);
+            } else {
+                setNoneFound(true);
             }
+        } else {
+            setError(true);
         }
         // console.log(res.includes);
 
         setLoading(false);
     };
+
+    const onSubmit = e => {
+        e.preventDefault();
+        searchForSpaces(searchValue);
+    };
+
     const searchComponent = (
         <Fragment>
             <Box
@@ -101,7 +115,9 @@ function Spaces() {
                 <Paper
                     // fullWidth
                     component="form"
-                    className="py-0.5 px-1 flex items-center"
+                    onSubmit={onSubmit}
+                    className="py-0.5 px-1 flex items-center rounded-full"
+                    elevation={4}
                 // sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', }}
                 >
                     <IconButton sx={{ p: '10px' }} aria-label="menu">
@@ -164,54 +180,60 @@ function Spaces() {
                     <CircularProgress size={30} color="secondary" />
                 </Box>
             }
+
+            {error && <Typography variant="caption" color="text.warning" className=''>Error loading spaces, try again!</Typography>}
+
+            {noneFound && <Typography variant="h5" color="text.primary" className=''>No Twitter Spaces found for the searched keyword</Typography>}
             {/* List of spaces */}
-            {spacesList.data.length !== 0 && <Tabs onChange={handleChange} value={value} centered>
-                <Tab className="capitalize" label="Live" {...a11yProps(0)} />
-                <Tab className="capitalize" label="Scheduled" {...a11yProps(1)} />
-            </Tabs>}
+            {spacesList.data.length !== 0 && (
+                <>
+                    <Tabs onChange={handleChange} value={value} centered>
+                        <Tab className="capitalize" label="Live" {...a11yProps(0)} />
+                        <Tab className="capitalize" label="Scheduled" {...a11yProps(1)} />
+                    </Tabs>
 
+                    <TabPanel value={value} index={0}>
+                        <div className="flex flex-row flex-wrap justify-center md:justify-start">
+                            {spacesList.data.map((space, index) =>
+                                <Fragment key={space.id}> 
+                                    {space.state === 'live' &&
+                                        <Box className="p-4" sx={{ width: 300 }} key={space.id}>
+                                            <a href={"https://twitter.com/i/spaces/" + space.id} target="_blank" >
+                                                <Card key={space.id} variant="outlined">
+                                                    <CardItem user={spacesList.includes.users.find(x => x.id === space.creator_id)} space={space} />
+                                                </Card>
+                                            </a>
+                                        </Box>
+                                    }
+                                
+                                </Fragment>
+                            )}
 
-            <TabPanel value={value} index={0}>
-                <div className="flex flex-row flex-wrap">
-                    {spacesList.data.map((space, index) =>
-                        <Fragment key={space.id}> 
-                            {space.state === 'live' &&
-                                <Box className="p-4" sx={{ width: 300 }} key={space.id}>
-                                    <a href={"https://twitter.com/i/spaces/" + space.id} target="_blank" >
-                                        <Card key={space.id} variant="outlined">
-                                            <CardItem user={spacesList.includes.users.find(x => x.id === space.creator_id)} space={space} />
-                                        </Card>
-                                    </a>
-                                </Box>
-                            }
-                        
-                        </Fragment>
-                    )}
+                        </div>
+                    </TabPanel>
 
-                </div>
-            </TabPanel>
+                    <TabPanel value={value} index={1}>
+                        <div className="flex flex-row flex-wrap justify-center">
+                            {spacesList.data.map((space, index) =>
+                                <Fragment key={space.id}>
+                                    {space.state !== 'live' &&
+                                        <Box className="p-4" sx={{ width: 300 }} key={space.id}>
+                                            <a href={"https://twitter.com/i/spaces/" + space.id} target="_blank" >
+                                                <Card key={space.id} variant="outlined">
+                                                    <CardItem user={spacesList.includes.users.find(x => x.id === space.creator_id)} space={space} />
+                                                </Card>
+                                            </a>
+                                        </Box>
+                                    }
 
-            <TabPanel value={value} index={1}>
-                <div className="flex flex-row flex-wrap">
-                    {spacesList.data.map((space, index) =>
-                        <Fragment key={space.id}>
-                            {space.state !== 'live' &&
-                                <Box className="p-4" sx={{ width: 300 }} key={space.id}>
-                                    <a href={"https://twitter.com/i/spaces/" + space.id} target="_blank" >
-                                        <Card key={space.id} variant="outlined">
-                                            <CardItem user={spacesList.includes.users.find(x => x.id === space.creator_id)} space={space} />
-                                        </Card>
-                                    </a>
-                                </Box>
-                            }
+                                </Fragment>
+                            )}
 
-                        </Fragment>
-                    )}
-
-                </div>
-            </TabPanel>
+                        </div>
+                    </TabPanel>
+                </>
             
-            
+            )}            
         </div>
     );
 
