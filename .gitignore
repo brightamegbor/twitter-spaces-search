@@ -24,5 +24,4 @@ yarn-debug.log*
 yarn-error.log*
 .next
 .yarn/
-.yarnrc.yml
 dist/output.css
