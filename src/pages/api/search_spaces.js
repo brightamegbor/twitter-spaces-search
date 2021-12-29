@@ -22,7 +22,7 @@ export default async function SearchSpaces(req, res) {
     if (response.status === 200) {
         const jsonData = await response.json();
     
-        console.log(jsonData);
+        // console.log(jsonData);
     
         res.status(200).json(jsonData);
     } 

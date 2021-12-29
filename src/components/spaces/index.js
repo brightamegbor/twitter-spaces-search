@@ -213,7 +213,7 @@ function Spaces() {
                     </TabPanel>
 
                     <TabPanel value={value} index={1}>
-                        <div className="flex flex-row flex-wrap justify-center">
+                        <div className="flex flex-row flex-wrap justify-center md:justify-start">
                             {spacesList.data.map((space, index) =>
                                 <Fragment key={space.id}>
                                     {space.state !== 'live' &&
