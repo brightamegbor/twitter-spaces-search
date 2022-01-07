@@ -1,4 +1,0 @@
-###
-GET https://api.twitter.com/2/spaces/searchquery=gb&space.fields=title,created_at&expansions=creator_id
-User-Agent: "v2SpacesSearchJS",
-authorization: Bearer AAAAAAAAAAAAAAAAAAAAAF1LXQEAAAAA113IBz5E9rAlQd0ZAAbd7LVAG7c%3DhKAowkhWvGceOI6wV5a1fwu5dzItko6BHxqkGEngmmodJFedOw
