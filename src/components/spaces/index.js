@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useLayoutEffect, useState } from 'react';
 import { Box, CardMedia, Card, CardContent, Typography } from '@mui/material';
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
@@ -64,6 +64,32 @@ function Spaces() {
         setValue(newValue);
     };
 
+    useLayoutEffect(() => {
+        if (sessionStorage.getItem('spacesInputstate')) {
+            setSearchValue(sessionStorage.getItem('spacesInputstate'));
+        } else {
+            sessionStorage.setItem('spacesInputstate', searchValue)
+        }
+
+        if (sessionStorage.getItem('activeTabState')) {
+            setValue(parseInt(sessionStorage.getItem('activeTabState')));
+        } else {
+            sessionStorage.setItem('activeTabState', value.toString());
+        }
+
+        if (sessionStorage.getItem('spacesListState')) {
+            setSpacesList(JSON.parse(sessionStorage.getItem('spacesListState')));
+        } else {
+            sessionStorage.setItem('spacesListState', JSON.stringify((spacesList)));
+        }
+    }, [])
+
+    useEffect(() => {
+        sessionStorage.setItem('spacesInputstate', searchValue);
+        sessionStorage.setItem('activeTabState', value.toString());
+        sessionStorage.setItem('spacesListState', JSON.stringify((spacesList)));
+    }, [searchValue, spacesList])
+
     const apiUrl = process.env.NEXT_PUBLIC_SPACES_API_URL;
     const token = process.env.NEXT_PUBLIC_BEARER_TOKEN;
 
@@ -126,8 +152,9 @@ function Spaces() {
                     <InputBase
                         sx={{ ml: 1, flex: 1 }}
                         placeholder="Search for spaces.."
+                        value={searchValue}
                         inputProps={{ 'aria-label': 'search for spaces..' }}
-                        onChange={(e) => setSearchValue(e.target.value)}
+                        onChange={e => setSearchValue(e.target.value)}
                     />
                     <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={() => searchForSpaces(searchValue)}>
                         <SearchIcon />

@@ -2,6 +2,7 @@
 // import '../App.css';
 import '../../styles/globals.css';
 import Head from 'next/head';
+import SideDrawer from '../components/sidedrawer';
 
 function MyApp({ Component, pageProps }) {
     return (
@@ -25,7 +26,9 @@ function MyApp({ Component, pageProps }) {
                 />
                 <link href="/dist/output.css" rel="stylesheet"></link>
             </Head>
-            <Component {...pageProps} />
+            <SideDrawer>
+                <Component {...pageProps} />
+            </SideDrawer>
         </>
 )}
 

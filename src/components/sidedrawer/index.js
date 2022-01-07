@@ -25,6 +25,7 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import MuiAppBar from '@mui/material/AppBar';
 import MuiDrawer from '@mui/material/Drawer';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 const drawerWidth = 240;
 
@@ -120,17 +121,17 @@ function SideDrawer(props) {
                     <div>
                         <List>
                             {[{name: 'Spaces', path: "/"}, {name: 'My Tweets', path: "/tweets"}, 
-                            {name: 'Who Unfollowed Me', path: "/foll"}].map((text, index) => (
-                                <ListItem button key={text.name} 
-                                    selected={text.path === asPath}
-                                    >
-                                    <ListItemIcon>
-                                        {index === 0 ? <TravelExploreIcon /> :
-                                            index === 1 ? <AccountBalanceIcon /> :
-                                                index === 2 ? <MoneyIcon /> : <NotificationIcon />}
-                                    </ListItemIcon>
-                                    <ListItemText primary={text.name} />
-                                </ListItem>
+                            {name: 'Who Unfollowed Me', path: "/who"}].map((text, index) => (
+                                <Link href={text.path} key={text.name}>
+                                    <ListItem button selected={text.path === asPath}>
+                                        <ListItemIcon>
+                                            {index === 0 ? <TravelExploreIcon /> :
+                                                index === 1 ? <AccountBalanceIcon /> :
+                                                    index === 2 ? <MoneyIcon /> : <NotificationIcon />}
+                                        </ListItemIcon>
+                                        <ListItemText primary={text.name} />
+                                    </ListItem>
+                                </Link>
                             ))}
                         </List>
                         <Divider />
@@ -189,7 +190,8 @@ function SideDrawer(props) {
                         <MenuIcon />
                     </IconButton>
                     <Typography variant="h5" noWrap component="div">
-                        Twitter Spaces
+                        {asPath === "/" ? "Twitter Spaces" 
+                            : asPath === "/tweets" ? "My Tweets" : "Followers Check"}
                     </Typography>
                 </Toolbar>
             </AppBar>
@@ -214,7 +216,8 @@ function SideDrawer(props) {
                         <MenuIcon />
                     </IconButton>
                     <Typography variant="h6" noWrap component="div">
-                        Twitter Spaces
+                        {asPath === "/" ? "Twitter Spaces" 
+                        : asPath === "/tweets" ? "My Tweets" : "Followers Check"}
                     </Typography>
                 </Toolbar>
             </AppBarLarge>
